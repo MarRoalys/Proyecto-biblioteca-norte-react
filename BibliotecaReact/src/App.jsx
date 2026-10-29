@@ -1,38 +1,70 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Encabezado from './Components/Encabezado'
 import LibroCard from './Components/LibroCard'
 import Resumen from './Components/Resumen'
 
-const librosIniciales = [
-  { id: 1, isbn: '978-0132350884', titulo: 'Clean Code', autor: 'Robert C. Martin', categoria: 'Ingeniería de Software', estado: 'Disponible' },
-  { id: 2, isbn: '978-0307474728', titulo: 'Cien años de soledad', autor: 'Gabriel García Márquez', categoria: 'Literatura Clásica', estado: 'Disponible' },
-  { id: 3, isbn: '978-0133943030', titulo: 'Ingeniería de Software', autor: 'Ian Sommerville', categoria: 'Ingeniería de Software', estado: 'No Disponible' }
-]
+const API_URL = import.meta.env.VITE_API_URL
 
 function App() {
-  const [libros, setLibros] = useState(librosIniciales)
+  const [libros, setLibros] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
   const [busqueda, setBusqueda] = useState('')
+  const [categorias, setCategorias] = useState([])
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('')
 
-  const librosFiltrados = libros.filter((libro) => {
-    const texto = busqueda.toLowerCase()
+  async function cargarLibros() {
+    try {
+      setCargando(true)
+      setError('')
+      const respuesta = await fetch(`${API_URL}/api/public/libros`)
+      if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`)
+      const datos = await respuesta.json()
+      setLibros(datos)
+    } catch (err) {
+      setError('No fue posible cargar los libros desde la API.')
+      console.error(err)
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  async function cargarCategorias() {
+  try {
+    const respuesta = await fetch(`${API_URL}/api/Catalogos/categorias`)
+    if (!respuesta.ok) throw new Error('Error al cargar categorías')
+    const datos = await respuesta.json()
+    setCategorias(datos)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+  useEffect(() => {
+  cargarLibros()
+  cargarCategorias()
+}, [])
+
+ const librosFiltrados = libros.filter((libro) => {
+  const texto = busqueda.toLowerCase()
+  const coincideTexto = 
+    libro.titulo?.toLowerCase().includes(texto) ||
+    libro.isbn?.toLowerCase().includes(texto) ||
+    libro.autor?.toLowerCase().includes(texto)
+  
+  const coincideCategoria = categoriaSeleccionada === '' || libro.categoria === categoriaSeleccionada
+
+  return coincideTexto && coincideCategoria
+})
+  if (cargando) return <p className="mensaje">Cargando catálogo de libros...</p>
+
+  if (error) {
     return (
-      libro.titulo.toLowerCase().includes(texto) ||
-      libro.isbn.toLowerCase().includes(texto) ||
-      libro.autor.toLowerCase().includes(texto)
-    )
-  })
-
-  function cambiarEstado(id) {
-    setLibros((actuales) =>
-      actuales.map((libro) =>
-        libro.id === id
-          ? {
-              ...libro,
-              estado: libro.estado === 'Disponible' ? 'No Disponible' : 'Disponible'
-            }
-          : libro
-      )
+      <div className="mensaje-error">
+        <p>{error}</p>
+        <button onClick={cargarLibros}>Reintentar</button>
+      </div>
     )
   }
 
@@ -56,11 +88,7 @@ function App() {
         ) : (
           <section className="grid-animales">
             {librosFiltrados.map((libro) => (
-              <LibroCard
-                key={libro.id}
-                libro={libro}
-                onCambiarEstado={cambiarEstado}
-              />
+              <LibroCard key={libro.idLibro || libro.id} libro={libro} />
             ))}
           </section>
         )}
@@ -68,4 +96,5 @@ function App() {
     </>
   )
 }
+
 export default App

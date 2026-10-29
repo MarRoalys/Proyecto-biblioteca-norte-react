@@ -1,23 +1,24 @@
-function Resumen({ libros }) {
+function Resumen({ libros = [] }) {
   const total = libros.length
-  const disponibles = libros.filter((libro) => libro.estado === 'Disponible').length
+  const disponibles = libros.filter(l => l.estado === 1 || l.estado === true).length
   const prestados = total - disponibles
 
   return (
     <section className="resumen">
-      <div className="resumen-card">
-        <span>Total Libros</span>
-        <strong>{total}</strong>
+      <div className="tarjeta-resumen">
+        <h4>Total Libros</h4>
+        <p>{total}</p>
       </div>
-      <div className="resumen-card">
-        <span>Disponibles</span>
-        <strong>{disponibles}</strong>
+      <div className="tarjeta-resumen">
+        <h4>Disponibles</h4>
+        <p>{disponibles}</p>
       </div>
-      <div className="resumen-card">
-        <span>Prestados</span>
-        <strong>{prestados}</strong>
+      <div className="tarjeta-resumen">
+        <h4>Prestados</h4>
+        <p>{prestados}</p>
       </div>
     </section>
   )
 }
+
 export default Resumen
