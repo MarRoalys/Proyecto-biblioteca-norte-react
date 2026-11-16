@@ -1,11 +1,13 @@
 
-import { useAuth } from '../Auth/useAuth' 
+import { useAuth } from '../Auth/useAuth'
+import { Link } from 'react-router-dom' // 1. Importamos Link
 
-function LibroCard({ libro }) {
+function LibroCard({ libro, onEliminar }) {
   const estaDisponible = libro.estado === 1 || libro.estado === true;
-  
-  // 2. Extraemos la variable del usuario en sesión
   const { usuario } = useAuth(); 
+
+  // Aseguramos de usar el ID correcto según cómo venga de tu BD
+  const idDelLibro = libro.idLibro || libro.id; 
 
   return (
     <article className="Libro-card">
@@ -22,13 +24,21 @@ function LibroCard({ libro }) {
         </span>
       </p>
 
-      {/* 3. Agregamos los botones mágicos condicionados al rol */}
       {usuario?.role === 'Administrador' && (
         <div style={{ marginTop: '15px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          <button style={{ padding: '6px 12px', backgroundColor: '#1f4e3d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          
+          {/* 2. Reemplazamos el botón por un Link que lleva el ID en la URL */}
+          <Link 
+            to={`/libros/editar/${idDelLibro}`}
+            style={{ padding: '6px 12px', backgroundColor: '#1f4e3d', color: 'white', textDecoration: 'none', border: 'none', borderRadius: '4px', cursor: 'pointer', textAlign: 'center' }}
+          >
             Editar
-          </button>
-          <button style={{ padding: '6px 12px', backgroundColor: '#b42318', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          </Link>
+          
+          <button 
+            onClick={() => onEliminar(libro)}
+            style={{ padding: '6px 12px', backgroundColor: '#b42318', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          >
             Eliminar
           </button>
         </div>

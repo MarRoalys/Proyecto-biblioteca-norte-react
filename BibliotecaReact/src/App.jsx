@@ -4,6 +4,8 @@ import Dashboard from './Pages/Dashboard'
 import Libros from './Pages/Libros'
 import ProtectedRoute from './Auth/ProtectedRoute'
 import Menu from './Components/Menu'
+import LibroCrear from './Pages/LibrosCrear'
+import LibroEditar from './Pages/LibroEditar'
 
 function App() {
   return (
@@ -41,6 +43,25 @@ function App() {
             </ProtectedRoute>
           }
         />
+        
+        <Route 
+         path="/libros/nuevo" 
+         element={
+         <ProtectedRoute roles={['Administrador', 'Bibliotecario']}>
+           {/* AQUÍ ESTÁ LA CORRECCIÓN: Le quitamos la "s" */}
+           <LibroCrear />
+         </ProtectedRoute>
+         } 
+        />
+
+        <Route 
+        path="/libros/editar/:id" 
+        element={
+       <ProtectedRoute roles={['Administrador', 'Bibliotecario']}>
+       <LibroEditar />
+      </ProtectedRoute>
+       } 
+       />
       </Routes>
     </>
   )
